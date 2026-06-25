@@ -1,0 +1,39 @@
+# Synthetic Data Disclosure
+
+**All data in this prototype is synthetic.** No real citizen reports, phone
+numbers, UPI handles, bank accounts, or personal information are used or depicted.
+
+## What is synthetic and why
+
+We do not have access to real fraud-report data (nor should a hackathon team
+handle real victim PII). A network-detection demo is meaningless without a
+structure to find, so we **generate ~200 reports with deliberately planted ring
+structure** (`backend/data/generate.py`):
+
+- **3 planted fraud rings.** Each ring is a cluster of victims who share fraud
+  *infrastructure* — the same UPI handle, mule account, device fingerprint, and
+  scam script — spread across 2–3 districts:
+  - Ring A — "digital arrest / CBI", ~22 reports (Bengaluru, Mysuru, Mandya)
+  - Ring B — "customs parcel", ~16 reports (Delhi, Gurugram, Noida)
+  - Ring C — "ED money laundering", ~13 reports (Mumbai, Pune, Thane)
+- **~150 noise reports.** Isolated one-off scams (each with unique infrastructure)
+  and ordinary benign messages, so the algorithm must *separate* signal from noise
+  rather than be handed the answer.
+- **5 held-back reports** (incl. "Lakshmi") injected live during the demo so the
+  graph visibly grows on stage.
+
+## This is legitimate, and here is the honest part
+
+- The **ring structure is planted** — we know the rings are there because we put
+  them there. What is *real* is that **Louvain community detection and PageRank
+  centrality independently rediscover them** from the raw report graph, with no
+  hint of where they are. That is the actual technical claim, and it is genuine.
+- The **scam scripts are modeled on real, publicly documented Indian fraud
+  patterns** (digital-arrest/CBI, customs-parcel, TRAI-disconnect, ED-laundering,
+  KYC/OTP). They are representative, not copied from any real victim.
+- On real data, the same pipeline runs unchanged — only the data source differs.
+
+## Reproducibility
+
+The generator is seeded (`random.seed(42)`), so the dataset is deterministic.
+Regenerate any time with `python -m data.generate`.

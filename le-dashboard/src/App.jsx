@@ -1,0 +1,121 @@
+import { useEffect, useRef, useState } from "react";
+import { fetchGraph, fetchRings, fetchPackage } from "./api.js";
+import ForceGraph from "./components/ForceGraph.jsx";
+import RingPanel from "./components/RingPanel.jsx";
+import KingpinCard from "./components/KingpinCard.jsx";
+
+export default function App() {
+  const [graph, setGraph] = useState({ nodes: [], edges: [] });
+  const [rings, setRings] = useState([]);
+  const [detected, setDetected] = useState(false);
+  const [selectedRing, setSelectedRing] = useState(null);
+  const [pkg, setPkg] = useState(null);
+  const [err, setErr] = useState(null);
+  const stageRef = useRef(null);
+  const [dims, setDims] = useState({ width: 800, height: 600 });
+
+  useEffect(() => {
+    const ro = new ResizeObserver(([e]) =>
+      setDims({ width: e.contentRect.width, height: e.contentRect.height })
+    );
+    if (stageRef.current) ro.observe(stageRef.current);
+    return () => ro.disconnect();
+  }, []);
+
+  async function loadGraph() {
+    try {
+      setGraph(await fetchGraph());
+      setErr(null);
+    } catch (e) {
+      setErr("Cannot reach backend on :8000 — is uvicorn running?");
+    }
+  }
+
+  useEffect(() => { loadGraph(); }, []);
+
+  async function detectRings() {
+    try {
+      const r = await fetchRings();
+      setRings(r);
+      setDetected(true);
+    } catch (e) {
+      setErr("Ring detection failed.");
+    }
+  }
+
+  async function selectRing(ringId) {
+    setSelectedRing(ringId);
+    setPkg(null);
+    try {
+      setPkg(await fetchPackage(ringId));
+    } catch (e) {
+      setErr(`Package for ${ringId} failed.`);
+    }
+  }
+
+  const reportCount = graph.nodes.filter((n) => n.label === "Report").length;
+
+  return (
+    <div className="h-full flex text-slate-200">
+      {/* sidebar */}
+      <aside className="w-80 shrink-0 bg-slate-900 border-r border-slate-800 flex flex-col">
+        <div className="p-4 border-b border-slate-800">
+          <h1 className="text-lg font-bold text-white">Fraud Intelligence</h1>
+          <p className="text-xs text-slate-400">Command Dashboard</p>
+        </div>
+
+        <div className="p-4 grid grid-cols-2 gap-2 text-center">
+          <Stat label="Reports" value={reportCount} />
+          <Stat label="Rings" value={detected ? rings.length : "—"} />
+        </div>
+
+        <div className="px-4 flex gap-2">
+          <button
+            onClick={detectRings}
+            className="flex-1 rounded-lg bg-cyan-500 hover:bg-cyan-400 text-slate-900 font-bold py-2"
+          >
+            🔍 Detect Rings
+          </button>
+          <button
+            onClick={loadGraph}
+            title="Refresh graph (after new reports)"
+            className="rounded-lg bg-slate-700 hover:bg-slate-600 px-3 py-2"
+          >
+            ⟳
+          </button>
+        </div>
+
+        <div className="p-4 overflow-y-auto flex-1 space-y-4">
+          <RingPanel rings={rings} detected={detected} selectedRing={selectedRing} onSelect={selectRing} />
+          <KingpinCard pkg={pkg} />
+        </div>
+
+        {err && <div className="p-3 text-xs text-red-300 bg-red-950/40 border-t border-red-900">{err}</div>}
+      </aside>
+
+      {/* graph stage */}
+      <main ref={stageRef} className="flex-1 relative">
+        <div className="absolute top-3 left-3 z-10 text-xs text-slate-400 bg-slate-900/70 rounded px-2 py-1">
+          {detected ? "Louvain communities + PageRank kingpins" : "Live report graph — click Detect Rings"}
+        </div>
+        <ForceGraph
+          graph={graph}
+          detected={detected}
+          selectedRing={selectedRing}
+          onPick={(n) => n.label === "Report" || setSelectedRing(selectedRing)}
+          width={dims.width}
+          height={dims.height}
+        />
+      </main>
+    </div>
+  );
+}
+
+function Stat({ label, value }) {
+  return (
+    <div className="rounded-lg bg-slate-800 py-2">
+      <div className="text-2xl font-bold text-white">{value}</div>
+      <div className="text-xs text-slate-400">{label}</div>
+    </div>
+  );
+}

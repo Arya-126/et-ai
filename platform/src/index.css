@@ -1,0 +1,11 @@
+@import "tailwindcss";
+
+html, body, #root { height: 100%; margin: 0; }
+body { background: #0b1220; }
+
+/* WhatsApp-ish chat backdrop (citizen view) */
+.chat-bg {
+  background-color: #efeae2;
+  background-image: radial-gradient(rgba(0, 0, 0, 0.04) 1px, transparent 1px);
+  background-size: 16px 16px;
+}
