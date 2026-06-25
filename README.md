@@ -181,7 +181,9 @@ setup.sh / .ps1   one-command bootstrap   ·   Makefile   ·   .github/workflows
 ## Deploy / operate
 
 - **Container:** `docker compose up app` → http://localhost:8000. The image bakes the
-  demo data + trained currency CNN, so it's ready on first boot.
+  demo data + trained currency CNN, so it's ready on first boot. For a lean image
+  without the 200 MB torch wheel (currency runs OpenCV features-only), build with
+  `docker build --build-arg WITH_CNN=0 -t fraud-shield:lite .`.
 - **Health:** `GET /health` reports component readiness (`graph_backend`, `llm_up`,
   `currency_cnn`, `spa_built`) — wire it to your load balancer.
 - **Scale knobs:** `GRAPH_BACKEND` (networkx in-process ↔ neo4j cluster), `OLLAMA_*`
