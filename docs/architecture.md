@@ -87,21 +87,34 @@ Package** opens the court-ready PDF.
 Node id convention `Label:value` (e.g. `UPI:digitalarrest.a@okaxis`) makes MERGE
 and dedup trivial and keeps ids stable across the two backends.
 
-## API surface
+## API surface (all components, one backend)
 
-| Method | Path | Purpose |
-|---|---|---|
-| POST | `/report` | Citizen submits a message → enriched `Report` (verdict + entities) |
-| GET | `/graph` | Full graph + community colors for the force viz |
-| GET | `/rings` | Detected rings (Louvain) with kingpin per ring |
-| GET | `/package/{ring_id}` | Ring subgraph + PageRank centrality + PDF url |
-| GET | `/package/{ring_id}/pdf` | The rendered intelligence package PDF |
-| GET | `/health` | Backend status, active graph backend, LLM reachability |
+| Method | Path | Component | Purpose |
+|---|---|---|---|
+| POST | `/report` | 1,2,5 | Citizen message → enriched `Report` (verdict, localized advice, alert) |
+| POST | `/report/complaint` | 5 | NCRB/cybercrime.gov.in complaint PDF from a report |
+| GET | `/languages` | 5 | Supported languages for the Shield selector |
+| GET | `/alerts` · `/alerts/{id}/pdf` | 1 | Generated MHA/telecom alerts + alert PDF |
+| POST | `/currency/scan` | 2 | Note image → genuine/counterfeit + feature breakdown |
+| GET | `/currency/samples` · `/samples/{id}` | 2 | Demo sample notes |
+| GET | `/graph` · `/rings` | 4 | Fraud graph + community colors; detected rings + kingpin |
+| GET | `/package/{ring_id}` · `/pdf` | 4 | Ring subgraph + PageRank + court-ready PDF |
+| GET | `/geo` | 4(geo) | Complaint hotspots, patrol priority, seizures |
+| GET | `/health` | — | Status + component readiness (`graph_backend`, `llm_up`, `currency_cnn`, `spa_built`) |
 
-## Resilience (live-demo insurance)
+Everything else is served as the **platform SPA** (catch-all → `index.html`).
 
-- **No Docker / Neo4j down** → auto-fallback to NetworkX, identical behavior.
-- **In-memory backend** → the server auto-seeds `reports.json` on startup (the CLI
-  seed runs in a different process).
+## Resilience (every external dependency has a fallback)
+
+- **Neo4j down / no Docker** → auto-fallback to NetworkX, identical behavior.
 - **Ollama down / no GPU** → classifier degrades to the deterministic rule layer.
-- **Live demo fails entirely** → pre-recorded demo video (deliverable).
+- **Currency CNN weights missing** → `infer` degrades to OpenCV features-only.
+- **OSM tiles blocked** → Crime Map falls back to an offline SVG India plot.
+- **In-memory backend** → the server auto-seeds `reports.json` on startup.
+
+## Deployment
+
+Single `Dockerfile` (multi-stage: Node build → Python runtime) bakes the demo data
+and trained currency CNN, then serves the SPA + API on `:8000`. `docker compose up
+app` runs it standalone (NetworkX); the `neo4j` compose profile adds the GDS graph
+DB. CI (GitHub Actions) runs the backend tests + a production platform build.

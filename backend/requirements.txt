@@ -13,7 +13,7 @@ ollama==0.3.3
 # Graph
 neo4j==5.24.0
 networkx==3.3
-scipy==1.13.1
+scipy>=1.13.1            # >=1.14 auto-selected on Python 3.13 (no 1.13 wheels there)
 python-louvain==0.16
 
 # PDF
@@ -23,7 +23,8 @@ reportlab==4.2.2
 #   pip install torch torchvision --index-url https://download.pytorch.org/whl/cpu
 torch==2.12.1
 torchvision==0.27.1
-opencv-python-headless==4.13.0
+# 4-part version scheme; range keeps it installable on Linux + Windows wheels
+opencv-python-headless>=4.11,<4.14
 
 # File uploads (currency scan)
 python-multipart==0.0.9

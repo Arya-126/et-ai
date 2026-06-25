@@ -1,5 +1,10 @@
 # Fraud Network Intelligence + Citizen Fraud Shield
 
+![CI](https://github.com/Arya-126/et-ai/actions/workflows/ci.yml/badge.svg)
+![python](https://img.shields.io/badge/python-3.12-blue)
+![react](https://img.shields.io/badge/react-18-61dafb)
+![license](https://img.shields.io/badge/license-MIT-green)
+
 > A scared citizen's WhatsApp message becomes the data that maps a criminal fraud network — in real time.
 
 **ET AI Hackathon 2026 — Problem Statement 6.** All **five** components, built and
@@ -64,10 +69,29 @@ Citizen pastes a scam message  ──► instant verdict ("HIGH RISK — Digital
 | Front end | **One unified platform** (`platform/`) — React + Tailwind + router (Vite). Served by the backend. |
 | PDF | ReportLab (pure Python) |
 
+## Run it (pick one)
+
+Everything runs as a single app at **http://localhost:8000**.
+
+**A. Docker (one command — recommended):**
+```bash
+docker compose up app          # builds image, bakes data + CNN, serves the platform
+# open http://localhost:8000
+```
+
+**B. One-command setup (native):**
+```bash
+./setup.sh        # macOS/Linux/WSL      (SKIP_CNN=1 ./setup.sh to skip CNN training)
+./setup.ps1       # Windows PowerShell   (-SkipCNN to skip CNN training)
+cd backend && uvicorn app.main:app --port 8000
+```
+
+**C. Manual** — see the step-by-step below.
+
 ## Quick start (one platform, one URL)
 
-Everything — Home, Citizen Shield, and Command Dashboard — runs as a single app
-served by the FastAPI backend at **http://localhost:8000**.
+Everything — Home, Citizen Shield, Currency Check, Command Dashboard, and Crime Map —
+runs as a single app served by the FastAPI backend at **http://localhost:8000**.
 
 ```bash
 # 1. (optional) Neo4j — primary graph path
@@ -138,3 +162,34 @@ With the platform open at http://localhost:8000:
 
 Full rehearsable script: [docs/demo-runbook.md](docs/demo-runbook.md).
 See also [docs/architecture.md](docs/architecture.md) and [docs/synthetic-disclosure.md](docs/synthetic-disclosure.md).
+
+## Project structure
+
+```
+platform/         unified React SPA (Home · Shield · Currency · Command · Map)
+backend/
+  app/            FastAPI app, routers, agents (LangGraph), graph stores, reporting
+  cv/             counterfeit-currency CNN: generate_notes · model · train · infer
+  data/           synthetic generator, scam scripts, geo table, 12-language i18n
+  tests/          pytest (17 tests)
+docs/             architecture, disclosure, runbook, deck, verification record
+Dockerfile        single-image deployment (serves SPA + API on :8000)
+docker-compose.yml app service (+ optional neo4j profile)
+setup.sh / .ps1   one-command bootstrap   ·   Makefile   ·   .github/workflows/ci.yml
+```
+
+## Deploy / operate
+
+- **Container:** `docker compose up app` → http://localhost:8000. The image bakes the
+  demo data + trained currency CNN, so it's ready on first boot.
+- **Health:** `GET /health` reports component readiness (`graph_backend`, `llm_up`,
+  `currency_cnn`, `spa_built`) — wire it to your load balancer.
+- **Scale knobs:** `GRAPH_BACKEND` (networkx in-process ↔ neo4j cluster), `OLLAMA_*`
+  (point at any Ollama host), `CORS_ORIGINS`.
+- **CI:** GitHub Actions runs the backend tests (with the rule-layer fallback) and a
+  production platform build on every push/PR.
+
+## License
+
+[MIT](LICENSE). All datasets are synthetic and disclosed — see
+[docs/synthetic-disclosure.md](docs/synthetic-disclosure.md).

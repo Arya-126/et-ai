@@ -1,13 +1,32 @@
+# Full-platform deployment.
+#   docker compose up app                 -> http://localhost:8000 (NetworkX, no extra infra)
+#   docker compose --profile neo4j up     -> also start Neo4j+GDS (set GRAPH_BACKEND=neo4j)
 services:
+  app:
+    build: .
+    container_name: fraud-shield-app
+    ports:
+      - "8000:8000"
+    environment:
+      GRAPH_BACKEND: ${GRAPH_BACKEND:-networkx}
+      NEO4J_URI: bolt://neo4j:7687
+      NEO4J_USER: neo4j
+      NEO4J_PASSWORD: fraudpass
+      # reach an Ollama running on the host (optional; classifier falls back to rules)
+      OLLAMA_BASE_URL: ${OLLAMA_BASE_URL:-http://host.docker.internal:11434}
+      OLLAMA_MODEL: ${OLLAMA_MODEL:-llama3.2:3b}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
   neo4j:
     image: neo4j:5.20
     container_name: fraud-neo4j
+    profiles: ["neo4j"]
     ports:
       - "7474:7474"   # Neo4j Browser
       - "7687:7687"   # Bolt
     environment:
       NEO4J_AUTH: neo4j/fraudpass
-      # Graph Data Science (community edition plugin)
       NEO4J_PLUGINS: '["graph-data-science"]'
       NEO4J_dbms_security_procedures_unrestricted: "gds.*"
       NEO4J_dbms_security_procedures_allowlist: "gds.*"

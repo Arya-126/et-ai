@@ -1,0 +1,46 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  backend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install backend deps (CPU torch)
+        working-directory: backend
+        run: |
+          python -m pip install --upgrade pip
+          pip install torch==2.12.1 torchvision==0.27.1 --index-url https://download.pytorch.org/whl/cpu
+          pip install -r requirements.txt
+      - name: Generate data + train currency CNN
+        working-directory: backend
+        run: |
+          python -m data.generate
+          python -m cv.generate_notes
+          python -m cv.train
+      - name: Run tests
+        working-directory: backend
+        env:
+          GRAPH_BACKEND: networkx
+          OLLAMA_BASE_URL: http://127.0.0.1:1   # force the rule-layer fallback path
+        run: python -m pytest -q
+
+  frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Build the unified platform
+        working-directory: platform
+        run: |
+          npm ci || npm install
+          npm run build

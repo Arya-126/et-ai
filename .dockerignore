@@ -1,0 +1,19 @@
+# keep the build context small + reproducible
+**/node_modules
+**/dist
+**/.venv
+**/__pycache__
+**/*.pyc
+.git
+.github
+backend/cv/data
+backend/cv/samples
+backend/cv/*.pt
+backend/data/reports.json
+backend/data/holdback.json
+backend/data/seed.cypher
+backend/out
+**/.env
+docs
+*.md
+!backend/requirements.txt
