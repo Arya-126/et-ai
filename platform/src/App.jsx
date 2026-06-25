@@ -2,11 +2,15 @@ import { NavLink, Routes, Route, Navigate } from "react-router-dom";
 import Home from "./pages/Home.jsx";
 import Shield from "./pages/Shield.jsx";
 import Command from "./pages/Command.jsx";
+import Currency from "./pages/Currency.jsx";
+import CrimeMap from "./pages/CrimeMap.jsx";
 
 const NAV = [
   { to: "/", label: "Home", end: true },
   { to: "/shield", label: "Citizen Shield" },
+  { to: "/currency", label: "Currency Check" },
   { to: "/command", label: "Command Dashboard" },
+  { to: "/map", label: "Crime Map" },
 ];
 
 export default function App() {
@@ -39,7 +43,9 @@ export default function App() {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/shield" element={<Shield />} />
+          <Route path="/currency" element={<Currency />} />
           <Route path="/command" element={<Command />} />
+          <Route path="/map" element={<CrimeMap />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </div>

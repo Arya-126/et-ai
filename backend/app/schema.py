@@ -40,6 +40,10 @@ class Report(BaseModel):
     district: Optional[str] = None
     timestamp: datetime = Field(default_factory=_now)
 
+    # --- digital-arrest call metadata (optional signals) ---
+    video_call: Optional[bool] = None        # scammer demanded a video call
+    caller_spoofed: Optional[bool] = None     # caller ID looks spoofed
+
     # --- verdict block (filled by ClassifierAgent) ---
     verdict: Optional[Verdict] = None
     scam_type: Optional[str] = None
@@ -47,6 +51,10 @@ class Report(BaseModel):
     red_flags: list[str] = Field(default_factory=list)
     advice: Optional[str] = None
     matched_script_id: Optional[str] = None
+    language: str = "en"                       # localized advice language
+
+    # --- alerting (filled by AlertingAgent on HIGH RISK digital-arrest) ---
+    alert: Optional["Alert"] = None
 
 
 class ReportInput(BaseModel):
@@ -56,6 +64,7 @@ class ReportInput(BaseModel):
     channel: Channel = "whatsapp"
     reporter_id: Optional[str] = None
     district: Optional[str] = None
+    language: str = "en"                       # ISO code; localizes the verdict/advice
 
 
 class Classification(BaseModel):
@@ -107,5 +116,70 @@ class Ring(BaseModel):
     size: int                     # number of nodes
     report_count: int
     districts: list[str] = Field(default_factory=list)
+    states: list[str] = Field(default_factory=list)   # cross-jurisdiction framing
     node_ids: list[str] = Field(default_factory=list)
     top_node: Optional[ScoredNode] = None   # the kingpin (highest PageRank)
+
+
+# --------------------------------------------------------------------------
+# Component 1 — Digital Arrest alerting
+# --------------------------------------------------------------------------
+
+AlertKind = Literal["MHA", "TELECOM"]
+
+
+class Alert(BaseModel):
+    alert_id: str = Field(default_factory=_new_id)
+    report_id: str
+    kind: AlertKind                # MHA/I4C escalation or telecom block/monitor
+    target: str                    # who it goes to (e.g. "I4C / MHA", "Telecom: Airtel")
+    summary: str
+    scam_type: Optional[str] = None
+    phone: Optional[str] = None
+    upi_id: Optional[str] = None
+    district: Optional[str] = None
+    created: datetime = Field(default_factory=_now)
+
+
+# --------------------------------------------------------------------------
+# Component 2 — Counterfeit currency CV
+# --------------------------------------------------------------------------
+
+class CurrencyFeature(BaseModel):
+    name: str                      # "Microprint", "Security thread", ...
+    passed: bool
+    detail: str
+    score: float                   # 0..1
+
+
+class CurrencyResult(BaseModel):
+    verdict: Literal["GENUINE", "COUNTERFEIT", "UNCERTAIN"]
+    confidence: float
+    denomination: Optional[str] = None     # "₹500", ...
+    features: list[CurrencyFeature] = Field(default_factory=list)
+    model: str = "note-cnn"                # which model produced the verdict
+
+
+# --------------------------------------------------------------------------
+# Component 4 — Geospatial
+# --------------------------------------------------------------------------
+
+class GeoPoint(BaseModel):
+    district: str
+    state: str
+    lat: float
+    lng: float
+    count: int = 1
+    high_risk: int = 0
+    kind: str = "complaint"        # complaint | seizure | hotspot
+
+
+class GeoDTO(BaseModel):
+    points: list[GeoPoint] = Field(default_factory=list)        # individual complaints
+    hotspots: list[GeoPoint] = Field(default_factory=list)      # aggregated per district
+    seizures: list[GeoPoint] = Field(default_factory=list)      # counterfeit seizures
+    patrol_priority: list[GeoPoint] = Field(default_factory=list)  # ranked districts
+
+
+# Resolve the Report.alert forward reference now that Alert is defined.
+Report.model_rebuild()

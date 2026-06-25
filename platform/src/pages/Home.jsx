@@ -47,26 +47,32 @@ export default function Home() {
           <Stat n={stats.llm == null ? "…" : stats.llm ? "LLM" : "rules"} l="Classifier" c="text-amber-400" />
         </div>
 
-        {/* the two tools */}
-        <div className="mt-10 grid md:grid-cols-2 gap-4">
-          <Card
-            to="/shield"
-            accent="border-emerald-500/40"
-            tag="CITIZEN SIDE"
-            tagColor="text-emerald-400"
-            title="Citizen Fraud Shield"
-            body="Paste a suspicious call, SMS or message and get an instant verdict — HIGH RISK, SUSPICIOUS or LIKELY SAFE — with red flags, advice and a one-tap report to 1930."
-            cta="Open the chat →"
-          />
-          <Card
-            to="/command"
-            accent="border-red-500/40"
-            tag="LAW ENFORCEMENT SIDE"
-            tagColor="text-red-400"
-            title="Command Dashboard"
-            body="Watch reports form a live fraud graph. Run Louvain to light up rings across districts, and PageRank to flag the central mule account — then export a court-ready intelligence package."
-            cta="Open the dashboard →"
-          />
+        {/* all five components */}
+        <div className="mt-10 grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <Card to="/shield" accent="border-emerald-500/40" tag="CITIZEN · 12 LANGUAGES"
+                tagColor="text-emerald-400" title="Citizen Fraud Shield"
+                body="Instant scam verdicts over WhatsApp & IVR with red flags, advice and guided 1930 / NCRB reporting in 12 regional languages."
+                cta="Open the chat →" />
+          <Card to="/shield" accent="border-rose-500/40" tag="DETECTION + ALERTING"
+                tagColor="text-rose-400" title="Digital Arrest Detection"
+                body="Flags active digital-arrest sessions before money moves — spoofing signatures, video-call signals — and auto-generates MHA/I4C + telecom alerts."
+                cta="Try a scam message →" />
+          <Card to="/currency" accent="border-amber-500/40" tag="COMPUTER VISION"
+                tagColor="text-amber-400" title="Counterfeit Currency Agent"
+                body="A CNN + OpenCV feature checks identify fake notes by microprint, security thread, UV patch and serial print — on mobile, POS or bank machines."
+                cta="Scan a note →" />
+          <Card to="/command" accent="border-red-500/40" tag="LAW ENFORCEMENT"
+                tagColor="text-red-400" title="Fraud Network Graph"
+                body="Reports form a live graph. Louvain lights up rings across jurisdictions, PageRank flags the mule account, and a court-ready package exports."
+                cta="Open the dashboard →" />
+          <Card to="/map" accent="border-cyan-500/40" tag="GEOSPATIAL"
+                tagColor="text-cyan-400" title="Crime Pattern Map"
+                body="Complaint hotspots, counterfeit seizures and patrol-priority ranking on a command-centre map for inter-district intelligence sharing."
+                cta="Open the map →" />
+          <Card to="/command" accent="border-indigo-500/40" tag="THE LOOP"
+                tagColor="text-indigo-400" title="One connected platform"
+                body="Every citizen report feeds the graph, the map and the alerts in real time — five components, one closed loop, one URL."
+                cta="See it connect →" />
         </div>
 
         {/* the loop */}

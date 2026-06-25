@@ -67,6 +67,18 @@ class Neo4jStore(GraphStore):
         with self.driver.session() as s:
             s.run("MATCH (n) DETACH DELETE n")
 
+    def district_stats(self) -> dict[str, dict]:
+        with self.driver.session() as s:
+            rows = s.run(
+                "MATCH (r:Report) WHERE r.district IS NOT NULL "
+                "RETURN r.district AS d, count(*) AS total, "
+                "sum(CASE WHEN r.verdict = 'HIGH RISK' THEN 1 ELSE 0 END) AS hr"
+            )
+            return {
+                rec["d"]: {"total": rec["total"], "high_risk": rec["hr"]}
+                for rec in rows
+            }
+
     # ---- GDS compute --------------------------------------------------------
     def _project(self, session) -> None:
         session.run(
@@ -139,10 +151,12 @@ class Neo4jStore(GraphStore):
             districts = sorted(
                 {nodes_meta[n].get("district") for n in reports if nodes_meta[n].get("district")}
             )
+            from data.geo import state_of
+            states = sorted({s for d in districts if (s := state_of(d))})
             rings.append(Ring(
                 ring_id=f"ring-{comm}", community=comm, size=len(members),
-                report_count=len(reports), districts=districts, node_ids=members,
-                top_node=self._kingpin(members, nodes_meta, pagerank),
+                report_count=len(reports), districts=districts, states=states,
+                node_ids=members, top_node=self._kingpin(members, nodes_meta, pagerank),
             ))
         rings.sort(key=lambda r: r.report_count, reverse=True)
         return rings

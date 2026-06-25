@@ -60,11 +60,38 @@ def rule_score(report: Report) -> tuple[float, list[str], bool]:
     if report.claimed_authority:
         score += 0.1
 
+    # number-spoofing signatures (Component 1: digital-arrest detection)
+    if spoof_signature(report):
+        score += 0.2
+        flags.append("Caller ID shows spoofing signatures (impersonated authority)")
+    if report.video_call:
+        score += 0.15
+        flags.append("Scammer demanded a video call (a digital-arrest hallmark)")
+
     benign = any(p.search(text) for p in BENIGN_MARKERS)
     # only "really benign" if there is no money/threat language at all
     looks_benign = benign and not MONEY_OR_THREAT.search(text)
 
     return min(score, 1.0), flags, looks_benign
+
+
+def spoof_signature(report: Report) -> bool:
+    """Heuristic caller-ID spoofing detection for digital-arrest calls:
+    an explicit spoof flag, OR a domestic 'authority' caller arriving on an
+    international/odd-length number, OR a malformed caller id."""
+    if report.caller_spoofed:
+        return True
+    phone = report.phone or ""
+    text = (report.raw_text or "").lower()
+    claims_authority = bool(report.claimed_authority) or bool(
+        re.search(r"\b(cbi|ed|trai|customs|police|cyber cell|narcotics)\b", text)
+    )
+    digits = re.sub(r"\D", "", phone)
+    # an "authority" calling from a non +91 international number, or a wrong-length
+    # Indian mobile, is a classic spoof tell.
+    intl_non_india = phone.startswith("+") and not phone.startswith("+91")
+    malformed = bool(digits) and len(digits.lstrip("91")) not in (10,)
+    return claims_authority and (intl_non_india or malformed)
 
 
 def _verdict_from_score(score: float) -> str:

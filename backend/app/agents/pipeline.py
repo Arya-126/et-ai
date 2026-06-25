@@ -9,7 +9,7 @@ from typing import TypedDict
 
 from langgraph.graph import END, START, StateGraph
 
-from app.agents import classifier, graph_linker, intake
+from app.agents import alerting, classifier, graph_linker, intake
 from app.schema import Report, ReportInput
 
 
@@ -28,6 +28,12 @@ def _classifier_node(state: PipelineState) -> PipelineState:
     return state
 
 
+def _alert_node(state: PipelineState) -> PipelineState:
+    # Component 1: generate MHA/telecom alerts on HIGH RISK digital-arrest.
+    state["report"].alert = alerting.maybe_alert(state["report"])
+    return state
+
+
 def _graph_node(state: PipelineState) -> PipelineState:
     state["report"] = graph_linker.link(state["report"])
     return state
@@ -37,10 +43,12 @@ def _build_graph():
     g = StateGraph(PipelineState)
     g.add_node("intake", _intake_node)
     g.add_node("classify", _classifier_node)
+    g.add_node("alert", _alert_node)
     g.add_node("graph_link", _graph_node)
     g.add_edge(START, "intake")
     g.add_edge("intake", "classify")
-    g.add_edge("classify", "graph_link")
+    g.add_edge("classify", "alert")
+    g.add_edge("alert", "graph_link")
     g.add_edge("graph_link", END)
     return g.compile()
 

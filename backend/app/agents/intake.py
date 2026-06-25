@@ -50,4 +50,6 @@ def intake(inp: ReportInput) -> Report:
         account_no=account,
         reporter_id=inp.reporter_id,
         district=inp.district,
+        language=inp.language,
+        video_call=bool(re.search(r"video\s*call", text, re.I)) or None,
     )

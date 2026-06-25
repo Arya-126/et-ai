@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { fetchGraph, fetchRings, fetchPackage } from "../api.js";
+import { fetchGraph, fetchRings, fetchPackage, fetchAlerts, alertPdfUrl } from "../api.js";
 import ForceGraph from "../components/graph/ForceGraph.jsx";
 import RingPanel from "../components/graph/RingPanel.jsx";
 import KingpinCard from "../components/graph/KingpinCard.jsx";
@@ -10,6 +10,7 @@ export default function Command() {
   const [detected, setDetected] = useState(false);
   const [selectedRing, setSelectedRing] = useState(null);
   const [pkg, setPkg] = useState(null);
+  const [alerts, setAlerts] = useState([]);
   const [err, setErr] = useState(null);
   const stageRef = useRef(null);
   const [dims, setDims] = useState({ width: 800, height: 600 });
@@ -25,6 +26,7 @@ export default function Command() {
   async function loadGraph() {
     try {
       setGraph(await fetchGraph());
+      setAlerts(await fetchAlerts());
       setErr(null);
     } catch (e) {
       setErr("Cannot reach backend on :8000 — is uvicorn running?");
@@ -86,6 +88,26 @@ export default function Command() {
         <div className="p-4 overflow-y-auto flex-1 space-y-4">
           <RingPanel rings={rings} detected={detected} selectedRing={selectedRing} onSelect={selectRing} />
           <KingpinCard pkg={pkg} />
+
+          {alerts.length > 0 && (
+            <div className="rounded-xl border border-red-500/30 bg-slate-900 p-3">
+              <div className="text-xs uppercase tracking-wider text-red-300/80 mb-2">
+                🚨 Live alerts ({alerts.length})
+              </div>
+              <div className="space-y-2 max-h-56 overflow-y-auto">
+                {alerts.map((a) => (
+                  <a key={a.alert_id} href={alertPdfUrl(a.alert_id)} target="_blank" rel="noreferrer"
+                     className="block rounded-lg bg-slate-800 hover:bg-slate-700 px-3 py-2">
+                    <div className="flex justify-between text-xs">
+                      <span className={a.kind === "MHA" ? "text-red-300 font-semibold" : "text-amber-300 font-semibold"}>{a.kind}</span>
+                      <span className="text-slate-500">{a.district || "—"}</span>
+                    </div>
+                    <div className="text-xs text-slate-400 mt-0.5 truncate">{a.target}</div>
+                  </a>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
 
         {err && <div className="p-3 text-xs text-red-300 bg-red-950/40 border-t border-red-900">{err}</div>}

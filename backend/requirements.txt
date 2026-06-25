@@ -19,6 +19,15 @@ python-louvain==0.16
 # PDF
 reportlab==4.2.2
 
+# Counterfeit-currency CV (Component 2). Install torch from the CPU wheel index:
+#   pip install torch torchvision --index-url https://download.pytorch.org/whl/cpu
+torch==2.12.1
+torchvision==0.27.1
+opencv-python-headless==4.13.0
+
+# File uploads (currency scan)
+python-multipart==0.0.9
+
 # HTTP for demo_inject
 requests==2.32.3
 

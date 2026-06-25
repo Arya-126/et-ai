@@ -22,6 +22,11 @@ from app.schema import GraphDTO, GraphEdge, GraphNode, Report, Ring, ScoredNode
 ACTIONABLE = {"Account", "PhoneNumber", "UPI"}
 
 
+def _states_for(districts: list[str]) -> list[str]:
+    from data.geo import state_of
+    return sorted({s for d in districts if (s := state_of(d))})
+
+
 class NetworkXStore(GraphStore):
     def __init__(self) -> None:
         self.g = nx.Graph()
@@ -47,6 +52,20 @@ class NetworkXStore(GraphStore):
     def reset(self) -> None:
         self.g = nx.Graph()
         self._partition = {}
+
+    def district_stats(self) -> dict[str, dict]:
+        stats: dict[str, dict] = {}
+        for n, d in self.g.nodes(data=True):
+            if d.get("label") != "Report":
+                continue
+            district = d.get("district")
+            if not district:
+                continue
+            s = stats.setdefault(district, {"total": 0, "high_risk": 0})
+            s["total"] += 1
+            if d.get("verdict") == "HIGH RISK":
+                s["high_risk"] += 1
+        return stats
 
     # ---- community detection (Louvain) -------------------------------------
     def _partition_graph(self) -> dict[str, int]:
@@ -131,6 +150,7 @@ class NetworkXStore(GraphStore):
                     size=len(members),
                     report_count=len(reports),
                     districts=districts,
+                    states=_states_for(districts),
                     node_ids=members,
                     top_node=self._kingpin(members),
                 )

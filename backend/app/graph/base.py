@@ -44,6 +44,11 @@ class GraphStore(ABC):
         """Just one ring's nodes + edges, for the intelligence package."""
 
     @abstractmethod
+    def district_stats(self) -> dict[str, dict]:
+        """Per-district aggregates for the geospatial layer:
+        {district: {"total": int, "high_risk": int}}."""
+
+    @abstractmethod
     def reset(self) -> None:
         """Wipe the graph (used by seed.py for a clean reload)."""
 

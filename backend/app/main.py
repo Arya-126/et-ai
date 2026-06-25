@@ -16,7 +16,7 @@ from app.graph.factory import get_store
 from app.graph.networkx_store import NetworkXStore
 from app.llm import is_up as llm_is_up
 from app.llm import warmup as llm_warmup
-from app.routers import graph, package, report
+from app.routers import alerts, currency, geo, graph, package, report
 
 logging.basicConfig(level=logging.INFO)
 log = logging.getLogger("main")
@@ -34,6 +34,9 @@ app.add_middleware(
 app.include_router(report.router)
 app.include_router(graph.router)
 app.include_router(package.router)
+app.include_router(alerts.router)
+app.include_router(geo.router)
+app.include_router(currency.router)
 
 
 @app.on_event("startup")

@@ -68,12 +68,17 @@ def classify(report: Report) -> Classification:
 
 
 def apply_to(report: Report) -> Report:
-    """Run classify and merge the verdict block back onto the report."""
+    """Run classify and merge the verdict block back onto the report, localizing
+    the advice into the requested language (Component 5)."""
+    from data.i18n import advice_for
+
     c = classify(report)
     report.verdict = c.verdict
     report.scam_type = c.scam_type
     report.confidence = c.confidence
     report.red_flags = c.red_flags
-    report.advice = c.advice
     report.matched_script_id = c.matched_script_id
+    # localized advice for the chosen language; English keeps the LLM/rule advice.
+    lang = report.language or "en"
+    report.advice = c.advice if lang == "en" else (advice_for(c.verdict, lang) or c.advice)
     return report

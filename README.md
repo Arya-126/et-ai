@@ -2,7 +2,19 @@
 
 > A scared citizen's WhatsApp message becomes the data that maps a criminal fraud network — in real time.
 
-**ET AI Hackathon 2026 — Problem Statement 6.** A *closed loop* between two components: the **Citizen Fraud Shield** (conversational scam triage) is both the front-end demo *and* the data source that powers the back-end **Fraud Network Graph Intelligence** (ring detection over reports).
+**ET AI Hackathon 2026 — Problem Statement 6.** All **five** components, built and
+connected in one platform (one URL, one backend):
+
+| # | Component | In the platform |
+|---|---|---|
+| 1 | **Citizen Fraud Shield** (multi-channel) | WhatsApp + IVR chat, instant verdicts, **12 regional languages**, guided 1930/NCRB complaint PDF — `/shield` |
+| 2 | **Digital Arrest Detection & Alerting** | classifier + spoof signatures; auto-generates **MHA/I4C + telecom alerts** before transfer — `/shield`, alerts on `/command` |
+| 3 | **Counterfeit Currency Identification** | **PyTorch CNN + OpenCV** feature breakdown (microprint, thread, UV, serial) — `/currency` |
+| 4 | **Fraud Network Graph Intelligence** | Neo4j+GDS/NetworkX, Louvain rings + PageRank kingpin, court-ready PDF — `/command` |
+| 5 | **Geospatial Crime Pattern Intelligence** | Leaflet command-centre map: hotspots, seizures, patrol priority — `/map` |
+
+The innovation is the **closed loop**: every citizen report feeds the graph, the map,
+and the alert system in real time.
 
 ## The loop
 
@@ -71,8 +83,11 @@ cd platform && npm i && npm run build
 cd ../backend
 python -m venv .venv && . .venv/Scripts/activate   # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
+# torch is CPU-only via its own index (see requirements.txt header):
+#   pip install torch torchvision --index-url https://download.pytorch.org/whl/cpu
 cp ../.env.example .env               # edit GRAPH_BACKEND / OLLAMA_MODEL if needed
 python -m data.generate               # writes data/reports.json (~200, planted rings)
+python -m cv.generate_notes && python -m cv.train   # currency CNN (one-time, ~2 min CPU)
 python -m data.seed                   # Neo4j path only; the in-memory path auto-seeds
 uvicorn app.main:app --reload --port 8000
 

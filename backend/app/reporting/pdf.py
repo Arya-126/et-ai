@@ -54,6 +54,7 @@ def build_package_pdf(ring: Ring, subgraph: GraphDTO, centrality: list[ScoredNod
         ["Linked reports (victims)", str(ring.report_count)],
         ["Total nodes in ring", str(ring.size)],
         ["Districts affected", ", ".join(ring.districts) or "—"],
+        ["States / jurisdictions", ", ".join(ring.states) or "—"],
         ["Detection method", "Louvain community detection + PageRank centrality (GDS)"],
     ]
     t = Table(summary, colWidths=[60 * mm, 110 * mm])

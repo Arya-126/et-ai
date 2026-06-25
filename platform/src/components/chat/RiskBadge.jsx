@@ -4,12 +4,12 @@ const STYLES = {
   "LIKELY SAFE": { bg: "bg-emerald-600", ring: "ring-emerald-200", icon: "✅", text: "LIKELY SAFE" },
 };
 
-export default function RiskBadge({ verdict, confidence }) {
+export default function RiskBadge({ verdict, confidence, label }) {
   const s = STYLES[verdict] || STYLES.SUSPICIOUS;
   return (
     <div className={`inline-flex items-center gap-2 rounded-full px-3 py-1 text-white text-sm font-bold ring-4 ${s.bg} ${s.ring}`}>
       <span>{s.icon}</span>
-      <span>{s.text}</span>
+      <span>{label || s.text}</span>
       {confidence != null && (
         <span className="opacity-80 font-normal">· {Math.round(confidence * 100)}%</span>
       )}
