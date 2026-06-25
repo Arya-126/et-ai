@@ -22,8 +22,9 @@ ENV PYTHONUNBUFFERED=1 PYTHONDONTWRITEBYTECODE=1 \
     CORS_ORIGINS=http://localhost:8000
 
 # libgomp1 is needed by torch (OpenMP); opencv uses the -headless wheel (no GUI libs).
-RUN apt-get update && apt-get install -y --no-install-recommends libgomp1 \
-    && rm -rf /var/lib/apt/lists/*
+RUN apt-get update -o Acquire::Retries=10 \
+ && apt-get install -y --no-install-recommends -o Acquire::Retries=10 libgomp1 \
+ && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app/backend
 
