@@ -28,19 +28,24 @@ RUN apt-get update -o Acquire::Retries=10 \
 
 WORKDIR /app/backend
 
-# Install torch from the CPU wheel index in its own layer so it stays cached
-# across requirements.txt edits (torch is the slow ~200MB download).
-RUN pip install --no-cache-dir torch==2.12.1 torchvision==0.27.1 \
-        --index-url https://download.pytorch.org/whl/cpu
-# Then the rest (torch already satisfied, so it isn't re-fetched).
+# WITH_CNN=1 (default) installs torch + trains the currency CNN; WITH_CNN=0 builds
+# a lean image where the scanner runs OpenCV features-only (no 200MB torch wheel).
+#   docker build --build-arg WITH_CNN=0 -t fraud-shield:lite .
+ARG WITH_CNN=1
+
+# torch in its own layer so it stays cached across requirements.txt edits.
+RUN if [ "$WITH_CNN" = "1" ]; then \
+      pip install --no-cache-dir torch==2.12.1 torchvision==0.27.1 \
+        --index-url https://download.pytorch.org/whl/cpu ; \
+    fi
 COPY backend/requirements.txt ./
 RUN pip install --no-cache-dir -r requirements.txt
 
 COPY backend/ ./
-# bake demo data + the trained currency CNN into the image so it's ready to run
+# bake demo data (+ the trained currency CNN when WITH_CNN=1) into the image
 RUN python -m data.generate \
  && python -m cv.generate_notes \
- && python -m cv.train
+ && if [ "$WITH_CNN" = "1" ]; then python -m cv.train ; fi
 
 # built SPA from stage 1 -> /app/platform/dist (matches app.main._DIST)
 COPY --from=frontend /platform/dist /app/platform/dist

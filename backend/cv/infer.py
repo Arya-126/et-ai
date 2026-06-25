@@ -8,37 +8,39 @@ from __future__ import annotations
 import logging
 import os
 
-import torch
 from PIL import Image
 
 from cv import features as feat
-from cv.model import NoteCNN
-from cv.preprocess import to_tensor
 from app.schema import CurrencyResult
 
 log = logging.getLogger("cv.infer")
 WEIGHTS = os.path.join(os.path.dirname(__file__), "note_cnn.pt")
 
-_model: NoteCNN | None = None
+_model = None
 _loaded = False
 
 
-def _get_model() -> NoteCNN | None:
+def _get_model():
+    """Load the CNN if torch + weights are available; otherwise return None and
+    the scanner runs in OpenCV features-only mode (no torch required)."""
     global _model, _loaded
     if _loaded:
         return _model
     _loaded = True
-    if os.path.exists(WEIGHTS):
-        try:
-            m = NoteCNN()
-            m.load_state_dict(torch.load(WEIGHTS, map_location="cpu"))
-            m.eval()
-            _model = m
-            log.info("Loaded NoteCNN weights.")
-        except Exception as exc:  # noqa: BLE001
-            log.warning("Failed to load NoteCNN (%s); using features-only.", exc)
-    else:
+    if not os.path.exists(WEIGHTS):
         log.info("No NoteCNN weights; using features-only verdict.")
+        return None
+    try:
+        import torch
+        from cv.model import NoteCNN
+
+        m = NoteCNN()
+        m.load_state_dict(torch.load(WEIGHTS, map_location="cpu"))
+        m.eval()
+        _model = m
+        log.info("Loaded NoteCNN weights.")
+    except Exception as exc:  # noqa: BLE001 — torch missing or load failed
+        log.info("CNN unavailable (%s); using features-only.", exc)
     return _model
 
 
@@ -49,6 +51,9 @@ def scan(img: Image.Image) -> CurrencyResult:
 
     model = _get_model()
     if model is not None:
+        import torch
+        from cv.preprocess import to_tensor
+
         with torch.no_grad():
             probs = torch.softmax(model(to_tensor(img).unsqueeze(0)), dim=1)[0]
         p_fake = float(probs[1])

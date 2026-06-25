@@ -6,8 +6,7 @@ from __future__ import annotations
 import torch
 import torch.nn as nn
 
-IMG_SIZE = 128
-CLASSES = ["genuine", "fake"]   # index 0 = genuine, 1 = fake/counterfeit
+from cv.spec import CLASSES, IMG_SIZE  # noqa: F401  (re-exported for compatibility)
 
 
 class NoteCNN(nn.Module):
