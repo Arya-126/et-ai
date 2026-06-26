@@ -109,3 +109,21 @@ export async function fetchAnalytics() {
   if (!res.ok) throw new Error(`analytics ${res.status}`);
   return res.json();
 }
+
+// --- impact / ROI ---
+export async function fetchImpact() {
+  const res = await fetch(`/impact/summary`);
+  if (!res.ok) throw new Error(`impact ${res.status}`);
+  return res.json();
+}
+
+// --- screenshot OCR intake ---
+export async function ocrReport(blob, filename = "screenshot.png", language = "en") {
+  const fd = new FormData();
+  fd.append("file", blob, filename);
+  fd.append("language", language);
+  const res = await fetch(`/report/ocr`, { method: "POST", body: fd });
+  if (res.status === 503) throw new Error("OCR_UNAVAILABLE");
+  if (!res.ok) throw new Error(`ocr ${res.status}`);
+  return res.json();
+}

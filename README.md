@@ -149,7 +149,17 @@ leaving it to fall back to rules is the safe choice; on a GPU box raise the time
 
 ## Demo
 
-With the platform open at http://localhost:8000:
+**Fastest path:** open http://localhost:8000 and click the **▶ Run demo** button
+(bottom-right). It auto-plays the whole story across every tab with narration —
+Lakshmi's digital-arrest report → the ransom **Call Guard** screening → the ring
+lighting up on the **Command** graph → the **Crime Map** → **Analytics** →
+**Impact**. Because the platform streams **live updates (SSE)**, the graph,
+analytics and impact numbers update in real time as the demo injects events — no
+refresh button. The **Impact** tab shows ₹ at-risk intercepted and the projected
+national savings. (Citizen Shield also takes a **📎 screenshot** upload → OCR →
+verdict when `easyocr` is installed.)
+
+Manual walk-through, with the platform open at http://localhost:8000:
 
 1. **Citizen Shield** tab → paste a scam (or tap the *CBI 'digital arrest'* chip) →
    instant **HIGH RISK** verdict + advice + call-1930. The report joins the graph.

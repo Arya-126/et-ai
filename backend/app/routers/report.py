@@ -7,12 +7,13 @@ from __future__ import annotations
 
 import os
 
-from fastapi import APIRouter
+from fastapi import APIRouter, File, Form, HTTPException, UploadFile
 from fastapi.responses import FileResponse
 
 from app.agents.pipeline import process_report
 from app.reporting.complaint_pdf import build_complaint_pdf
 from app.schema import Report, ReportInput
+from cv import ocr
 from data.i18n import LANGUAGES
 
 router = APIRouter(tags=["citizen"])
@@ -21,6 +22,17 @@ router = APIRouter(tags=["citizen"])
 @router.post("/report", response_model=Report)
 def submit_report(inp: ReportInput) -> Report:
     return process_report(inp)
+
+
+@router.post("/report/ocr", response_model=Report)
+async def report_ocr(file: UploadFile = File(...), language: str = Form("en")) -> Report:
+    """Screenshot intake: OCR the image, then run it through the pipeline."""
+    text = ocr.extract_text(await file.read())
+    if not text:
+        raise HTTPException(
+            503, "OCR unavailable or no text found in the image — please type the message instead."
+        )
+    return process_report(ReportInput(raw_text=text, channel="screenshot", language=language))
 
 
 @router.post("/report/complaint")

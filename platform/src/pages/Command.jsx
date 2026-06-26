@@ -3,6 +3,7 @@ import { fetchGraph, fetchRings, fetchPackage, fetchAlerts, alertPdfUrl, fetchBl
 import ForceGraph from "../components/graph/ForceGraph.jsx";
 import RingPanel from "../components/graph/RingPanel.jsx";
 import KingpinCard from "../components/graph/KingpinCard.jsx";
+import { useEvents, debounce } from "../useEvents.js";
 
 export default function Command() {
   const [graph, setGraph] = useState({ nodes: [], edges: [] });
@@ -36,6 +37,17 @@ export default function Command() {
   }
 
   useEffect(() => { loadGraph(); }, []);
+  const live = useEvents(debounce(loadGraph, 500));   // live refresh on new reports/calls/alerts
+
+  // demo autopilot: /command?auto=1 runs Detect Rings + selects the kingpin
+  useEffect(() => {
+    if (!new URLSearchParams(window.location.search).get("auto")) return;
+    (async () => {
+      const rs = await fetchRings();
+      setRings(rs); setDetected(true);
+      if (rs[0]) selectRing(rs[0].ring_id);
+    })();
+  }, []);
 
   async function detectRings() {
     try {
@@ -62,7 +74,10 @@ export default function Command() {
     <div className="h-full flex text-slate-200">
       <aside className="w-80 shrink-0 bg-slate-900 border-r border-slate-800 flex flex-col">
         <div className="p-4 border-b border-slate-800">
-          <h1 className="text-lg font-bold text-white">Command Dashboard</h1>
+          <h1 className="text-lg font-bold text-white flex items-center gap-2">
+            Command Dashboard
+            {live && <span className="text-[10px] font-bold text-emerald-400 inline-flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />LIVE</span>}
+          </h1>
           <p className="text-xs text-slate-400">Fraud Network Intelligence</p>
         </div>
 

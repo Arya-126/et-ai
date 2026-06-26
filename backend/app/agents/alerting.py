@@ -44,6 +44,8 @@ class AlertStore:
 
     def add(self, alert: Alert) -> None:
         self._alerts.append(alert)
+        from app.events import publish   # local import avoids an import cycle
+        publish({"type": "alert", "kind": alert.kind, "district": alert.district})
 
     def all(self) -> list[Alert]:
         return list(reversed(self._alerts))   # newest first

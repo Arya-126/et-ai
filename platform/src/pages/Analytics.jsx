@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { fetchAnalytics } from "../api.js";
+import { useEvents, debounce } from "../useEvents.js";
 
 const VERDICT_COLOR = { "HIGH RISK": "#ef4444", SUSPICIOUS: "#f59e0b", "LIKELY SAFE": "#34d399" };
 
@@ -7,7 +8,9 @@ export default function Analytics() {
   const [a, setA] = useState(null);
   const [err, setErr] = useState(null);
 
-  useEffect(() => { fetchAnalytics().then(setA).catch(() => setErr("Cannot reach /analytics")); }, []);
+  const load = () => fetchAnalytics().then(setA).catch(() => setErr("Cannot reach /analytics"));
+  useEffect(() => { load(); }, []);
+  useEvents(debounce(load, 500));
 
   if (err) return <Center>{err}</Center>;
   if (!a) return <Center>Loading analytics…</Center>;

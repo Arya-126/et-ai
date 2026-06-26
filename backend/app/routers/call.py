@@ -10,6 +10,7 @@ from fastapi import APIRouter
 
 from app.agents import alerting, reputation
 from app.agents.pipeline import process_report
+from app.events import publish
 from app.schema import CallInput, CallScreenResult, NumberReputation, ReportInput
 
 router = APIRouter(tags=["call-guard"])
@@ -45,6 +46,8 @@ def screen_call(call: CallInput) -> CallScreenResult:
             report.scam_type = rep.scam_types[0]
         report.alert = alerting.maybe_alert(report)
 
+    publish({"type": "call", "verdict": report.verdict, "scam_type": report.scam_type,
+             "known": rep.known, "caller": call.caller_number})
     return CallScreenResult(report=report, reputation=rep)
 
 

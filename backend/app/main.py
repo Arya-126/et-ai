@@ -18,7 +18,8 @@ from app.graph.factory import get_store
 from app.graph.networkx_store import NetworkXStore
 from app.llm import is_up as llm_is_up
 from app.llm import warmup as llm_warmup
-from app.routers import alerts, analytics, call, currency, geo, graph, package, report
+from app.routers import (alerts, analytics, call, currency, events, geo, graph,
+                         impact, package, report)
 
 logging.basicConfig(level=logging.INFO)
 log = logging.getLogger("main")
@@ -32,6 +33,11 @@ _DIST = os.path.join(
 
 @asynccontextmanager
 async def lifespan(_app: FastAPI):
+    import asyncio
+
+    from app.events import broker
+    broker.bind_loop(asyncio.get_running_loop())   # enable thread-safe SSE publish
+
     store = get_store()  # triggers backend selection + fallback now
     log.info("Graph store ready: %s", type(store).__name__)
     # The in-memory backend lives only in this process, so auto-load the seed here
@@ -75,6 +81,8 @@ app.include_router(geo.router)
 app.include_router(currency.router)
 app.include_router(call.router)
 app.include_router(analytics.router)
+app.include_router(impact.router)
+app.include_router(events.router)
 
 
 @app.get("/health", tags=["meta"])

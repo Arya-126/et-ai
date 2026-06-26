@@ -36,8 +36,12 @@ def _alert_node(state: PipelineState) -> PipelineState:
 
 
 def _graph_node(state: PipelineState) -> PipelineState:
-    state["report"] = graph_linker.link(state["report"])
-    registry.add(state["report"])   # record for the analytics dashboard
+    r = graph_linker.link(state["report"])
+    state["report"] = r
+    registry.add(r)   # record for the analytics dashboard
+    from app.events import publish   # local import avoids a cycle at import time
+    publish({"type": "report", "verdict": r.verdict, "scam_type": r.scam_type,
+             "district": r.district, "channel": r.channel})
     return state
 
 

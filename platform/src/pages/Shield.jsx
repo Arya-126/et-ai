@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { submitReport, fetchLanguages } from "../api.js";
+import { submitReport, fetchLanguages, ocrReport } from "../api.js";
 import { ui } from "../i18n.js";
 import ChatBubble from "../components/chat/ChatBubble.jsx";
 import Verdict from "../components/chat/Verdict.jsx";
@@ -46,6 +46,25 @@ export default function Shield() {
       setMessages((m) => [...m, { kind: "verdict", report, lang }]);
     } catch (e) {
       setMessages((m) => [...m, { kind: "verdict", report: { verdict: "SUSPICIOUS", advice: "Couldn't reach the Fraud Shield backend. Is the API running on :8000?", red_flags: [] }, lang }]);
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function onFile(e) {
+    const f = e.target.files?.[0];
+    e.target.value = "";
+    if (!f || busy) return;
+    setMessages((m) => [...m, { kind: "user", text: "📷 Screenshot uploaded" }]);
+    setBusy(true);
+    try {
+      const report = await ocrReport(f, f.name, lang);
+      setMessages((m) => [...m, { kind: "user", text: report.raw_text || "(no text found)" }, { kind: "verdict", report, lang }]);
+    } catch (err) {
+      const msg = err.message === "OCR_UNAVAILABLE"
+        ? "Screenshot reading isn't enabled on this server — please type or paste the message text instead."
+        : "Couldn't read that screenshot — please type the message instead.";
+      setMessages((m) => [...m, { kind: "verdict", report: { verdict: "SUSPICIOUS", advice: msg, red_flags: [] }, lang }]);
     } finally {
       setBusy(false);
     }
@@ -107,6 +126,9 @@ export default function Shield() {
 
         {/* input */}
         <div className="flex items-center gap-2 p-3 bg-gray-100">
+          <label className="cursor-pointer text-xl px-1 text-slate-500 hover:text-slate-700" title="Upload a scam screenshot">
+            📎<input type="file" accept="image/*" className="hidden" onChange={onFile} disabled={busy} />
+          </label>
           <textarea rows={1} value={input} onChange={(e) => setInput(e.target.value)}
                     onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); } }}
                     placeholder={ui("placeholder", lang)}

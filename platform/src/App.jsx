@@ -6,6 +6,8 @@ import Currency from "./pages/Currency.jsx";
 import CrimeMap from "./pages/CrimeMap.jsx";
 import CallGuard from "./pages/CallGuard.jsx";
 import Analytics from "./pages/Analytics.jsx";
+import Impact from "./pages/Impact.jsx";
+import DemoController from "./DemoController.jsx";
 
 const NAV = [
   { to: "/", label: "Home", end: true },
@@ -15,6 +17,7 @@ const NAV = [
   { to: "/command", label: "Command Dashboard" },
   { to: "/map", label: "Crime Map" },
   { to: "/analytics", label: "Analytics" },
+  { to: "/impact", label: "Impact" },
 ];
 
 export default function App() {
@@ -52,9 +55,11 @@ export default function App() {
           <Route path="/command" element={<Command />} />
           <Route path="/map" element={<CrimeMap />} />
           <Route path="/analytics" element={<Analytics />} />
+          <Route path="/impact" element={<Impact />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </div>
+      <DemoController />
     </div>
   );
 }
