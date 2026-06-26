@@ -10,6 +10,7 @@ from typing import TypedDict
 from langgraph.graph import END, START, StateGraph
 
 from app.agents import alerting, classifier, graph_linker, intake
+from app.agents.registry import registry
 from app.schema import Report, ReportInput
 
 
@@ -36,6 +37,7 @@ def _alert_node(state: PipelineState) -> PipelineState:
 
 def _graph_node(state: PipelineState) -> PipelineState:
     state["report"] = graph_linker.link(state["report"])
+    registry.add(state["report"])   # record for the analytics dashboard
     return state
 
 

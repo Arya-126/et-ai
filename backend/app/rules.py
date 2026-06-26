@@ -25,8 +25,16 @@ SCAM_SIGNALS: list[tuple[re.Pattern, str, float]] = [
     (re.compile(r"transfer|pay|deposit|send\s+money|rtgs|imps|neft", re.I), "Asks you to transfer / pay money", 0.4),
     (re.compile(r"\b\w+@(okaxis|okhdfcbank|oksbi|okicici|ybl|paytm|upi|axl|ibl)\b", re.I), "Routes payment to a UPI handle", 0.45),
     (re.compile(r"verification\s+(fee|charge)|refundable\s+deposit|security\s+deposit", re.I), "Demands a 'verification' or 'security' fee", 0.4),
-    (re.compile(r"share\s+(your\s+)?(otp|cvv|pin|password)|tell\s+me\s+the\s+otp", re.I), "Asks you to share OTP / PIN / CVV", 0.5),
+    (re.compile(r"share\s+(your\s+)?(otp|cvv|pin|password)|tell\s+me\s+the\s+otp|read\s+(me\s+)?the\s+otp", re.I), "Asks you to share OTP / PIN / CVV", 0.5),
     (re.compile(r"keep\s+this\s+(call\s+)?confidential|do\s*n[o']?t\s+(tell|inform)\s+(anyone|family)", re.I), "Tells you to keep it secret from family", 0.4),
+    # ---- call-fraud families (Call Guard) -------------------------------
+    (re.compile(r"approve\s+(the\s+)?(request|collect)|collect\s+request|accept\s+(the\s+)?request\s+on\s+(your\s+)?upi", re.I), "Asks you to APPROVE a UPI collect request (money leaves your account)", 0.55),
+    (re.compile(r"we\s+have\s+your\s+(son|daughter|child|brother|husband|wife|father|mother)|your\s+\w+\s+(is\s+)?(kidnap|with\s+us|met\s+with\s+an\s+accident)", re.I), "Claims a family member is kidnapped or in an accident", 0.7),
+    (re.compile(r"do\s*n[o']?t\s+(call|inform)\s+(the\s+)?police|if\s+you\s+call\s+(the\s+)?police", re.I), "Forbids you from calling the police", 0.5),
+    (re.compile(r"ransom|bail\s+money|release\s+(him|her|your)", re.I), "Demands ransom / 'release' money", 0.5),
+    (re.compile(r"morph(ed)?|leak.{0,20}(photo|video|image)|intimate\s+(photo|video)|post.{0,20}online", re.I), "Threatens to leak morphed / intimate images (sextortion)", 0.6),
+    (re.compile(r"loan\s+app|emi\s+.{0,10}overdue|recovery\s+(agent|team)|defaulter", re.I), "Predatory loan-app recovery threat", 0.5),
+    (re.compile(r"guaranteed\s+.{0,10}return|activation\s+fee|withdraw.{0,20}deposit|vip\s+group|daily\s+earning|task.{0,10}(earn|commission)", re.I), "Investment / task scam: guaranteed returns or pay-to-withdraw", 0.5),
 ]
 
 # Markers that strongly suggest an ordinary, safe message. Used to cap verdicts.
@@ -67,6 +75,14 @@ def rule_score(report: Report) -> tuple[float, list[str], bool]:
     if report.video_call:
         score += 0.15
         flags.append("Scammer demanded a video call (a digital-arrest hallmark)")
+
+    # unsaved-number signal (Call Guard): an unknown caller making demands is a
+    # strong tell — fraud calls almost always come from numbers not in your contacts.
+    if report.caller_is_known is False and (
+        report.upi_id or report.claimed_authority or MONEY_OR_THREAT.search(text)
+    ):
+        score += 0.2
+        flags.append("Unknown caller (not in your contacts) making money/authority demands")
 
     benign = any(p.search(text) for p in BENIGN_MARKERS)
     # only "really benign" if there is no money/threat language at all
@@ -115,12 +131,20 @@ DEFAULT_ADVICE = {
 
 def _scam_family(text: str) -> str:
     """Best-effort scam family from text, so the rules-only path isn't always
-    'Digital Arrest'."""
+    'Digital Arrest'. Order matters — most specific first."""
     t = text.lower()
+    if re.search(r"we\s+have\s+your\s+(son|daughter|child|brother|husband|wife)|kidnap|ransom|met\s+with\s+an\s+accident", t):
+        return "Kidnapping / Ransom"
+    if re.search(r"loan\s+app|emi\s+.{0,10}overdue|recovery\s+(agent|team)|defaulter", t):
+        return "Loan-app / Recovery Scam"
+    if re.search(r"morph|sextortion|intimate\s+(photo|video)|leak.{0,20}(photo|video|image)", t):
+        return "Sextortion"
+    if re.search(r"guaranteed\s+.{0,10}return|activation\s+fee|withdraw.{0,20}deposit|vip\s+group|task.{0,10}(earn|commission)", t):
+        return "Investment / Task Scam"
     if re.search(r"parcel|customs|fedex|courier|narcotics", t):
         return "Parcel / Customs Scam"
-    if re.search(r"\bkyc\b|share.{0,10}otp|account.{0,10}(blocked|frozen)", t):
-        return "KYC / OTP Scam"
+    if re.search(r"\bkyc\b|share.{0,10}otp|read.{0,10}otp|approve\s+(the\s+)?(request|collect)|account.{0,10}(blocked|frozen)", t):
+        return "OTP / UPI Fraud"
     if re.search(r"lottery|lucky draw|won.{0,15}(prize|lakh|crore)|job offer", t):
         return "Lottery / Prize Scam"
     return "Digital Arrest / Impersonation Scam"

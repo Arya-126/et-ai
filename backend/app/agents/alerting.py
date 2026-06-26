@@ -59,10 +59,30 @@ store = AlertStore()
 
 
 def maybe_alert(report: Report) -> Alert | None:
-    """If this is a HIGH RISK digital-arrest report, generate the MHA + telecom
-    alerts, store them, and return the MHA alert (attached to the report)."""
-    if report.verdict != "HIGH RISK" or not _is_digital_arrest(report):
+    """On HIGH RISK: always raise a trusted-contact (family) alert; for
+    digital-arrest also raise MHA + telecom alerts. Returns the primary alert to
+    attach to the report (MHA if digital-arrest, else the CONTACT alert)."""
+    if report.verdict != "HIGH RISK":
         return None
+
+    # Trusted-contact alert — protects the elderly-victim case: loop in family fast.
+    contact = Alert(
+        report_id=report.report_id,
+        kind="CONTACT",
+        target="Trusted contact (family)",
+        summary=(
+            f"Likely {report.scam_type or 'scam'} targeting your relative"
+            f"{' on a call from ' + report.phone if report.phone else ''}. "
+            f"Please call them now — tell them not to transfer money or share any OTP."
+        ),
+        scam_type=report.scam_type,
+        phone=report.phone,
+        district=report.district,
+    )
+    store.add(contact)
+
+    if not _is_digital_arrest(report):
+        return contact
 
     mha = Alert(
         report_id=report.report_id,

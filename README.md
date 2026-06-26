@@ -157,8 +157,15 @@ With the platform open at http://localhost:8000:
    ```bash
    cd backend && python -m data.demo_inject     # "Lakshmi" + 4 held-back reports
    ```
-3. **Command Dashboard** tab → **⟳ refresh** → **Detect Rings** (3 rings light up) →
+3. **Call Guard** tab → pick the *🚩 Known scammer* incoming call (a number pulled
+   live from the graph) → **Screen with AI** → instant **HIGH RISK** even on benign
+   words, because the number is already in the fraud graph. Try the ransom / OTP /
+   sextortion calls too — each detected, with a family + authorities alert.
+4. **Command Dashboard** tab → **⟳ refresh** → **Detect Rings** (3 rings light up) →
    click the top ring → kingpin highlighted → **Generate Intelligence Package** (PDF).
+   The sidebar also shows the live **alerts** and **known-scammer block-list**.
+5. **Analytics** tab → scam-type / verdict / language / district breakdowns and the
+   reports-over-time trend.
 
 Full rehearsable script: [docs/demo-runbook.md](docs/demo-runbook.md).
 See also [docs/architecture.md](docs/architecture.md) and [docs/synthetic-disclosure.md](docs/synthetic-disclosure.md).

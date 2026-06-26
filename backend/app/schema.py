@@ -40,9 +40,10 @@ class Report(BaseModel):
     district: Optional[str] = None
     timestamp: datetime = Field(default_factory=_now)
 
-    # --- digital-arrest call metadata (optional signals) ---
+    # --- digital-arrest / call metadata (optional signals) ---
     video_call: Optional[bool] = None        # scammer demanded a video call
     caller_spoofed: Optional[bool] = None     # caller ID looks spoofed
+    caller_is_known: Optional[bool] = None    # False = unsaved number (Call Guard)
 
     # --- verdict block (filled by ClassifierAgent) ---
     verdict: Optional[Verdict] = None
@@ -65,6 +66,8 @@ class ReportInput(BaseModel):
     reporter_id: Optional[str] = None
     district: Optional[str] = None
     language: str = "en"                       # ISO code; localizes the verdict/advice
+    phone: Optional[str] = None                # caller number (Call Guard)
+    caller_is_known: Optional[bool] = None     # False = unsaved number (Call Guard)
 
 
 class Classification(BaseModel):
@@ -125,7 +128,7 @@ class Ring(BaseModel):
 # Component 1 — Digital Arrest alerting
 # --------------------------------------------------------------------------
 
-AlertKind = Literal["MHA", "TELECOM"]
+AlertKind = Literal["MHA", "TELECOM", "CONTACT"]
 
 
 class Alert(BaseModel):
@@ -179,6 +182,34 @@ class GeoDTO(BaseModel):
     hotspots: list[GeoPoint] = Field(default_factory=list)      # aggregated per district
     seizures: list[GeoPoint] = Field(default_factory=list)      # counterfeit seizures
     patrol_priority: list[GeoPoint] = Field(default_factory=list)  # ranked districts
+
+
+# --------------------------------------------------------------------------
+# Call Guard — phone-call screening + number reputation
+# --------------------------------------------------------------------------
+
+class CallInput(BaseModel):
+    """What the Call Guard screens: a (possibly unsaved) caller + transcript."""
+    caller_number: str
+    is_saved: bool = False                     # is the number in the user's contacts?
+    transcript: str                            # what the caller said (ASR or typed)
+    video_call: bool = False
+    language: str = "en"
+    district: Optional[str] = None
+
+
+class NumberReputation(BaseModel):
+    phone: str
+    known: bool = False                        # seen before in the fraud graph
+    report_count: int = 0
+    in_ring: bool = False
+    ring_id: Optional[str] = None
+    scam_types: list[str] = Field(default_factory=list)
+
+
+class CallScreenResult(BaseModel):
+    report: Report                             # the classified call
+    reputation: NumberReputation
 
 
 # Resolve the Report.alert forward reference now that Alert is defined.

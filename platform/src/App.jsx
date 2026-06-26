@@ -4,13 +4,17 @@ import Shield from "./pages/Shield.jsx";
 import Command from "./pages/Command.jsx";
 import Currency from "./pages/Currency.jsx";
 import CrimeMap from "./pages/CrimeMap.jsx";
+import CallGuard from "./pages/CallGuard.jsx";
+import Analytics from "./pages/Analytics.jsx";
 
 const NAV = [
   { to: "/", label: "Home", end: true },
   { to: "/shield", label: "Citizen Shield" },
+  { to: "/call", label: "Call Guard" },
   { to: "/currency", label: "Currency Check" },
   { to: "/command", label: "Command Dashboard" },
   { to: "/map", label: "Crime Map" },
+  { to: "/analytics", label: "Analytics" },
 ];
 
 export default function App() {
@@ -43,9 +47,11 @@ export default function App() {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/shield" element={<Shield />} />
+          <Route path="/call" element={<CallGuard />} />
           <Route path="/currency" element={<Currency />} />
           <Route path="/command" element={<Command />} />
           <Route path="/map" element={<CrimeMap />} />
+          <Route path="/analytics" element={<Analytics />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </div>

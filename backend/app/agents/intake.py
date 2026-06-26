@@ -41,15 +41,19 @@ def intake(inp: ReportInput) -> Report:
 
     authority = next((name for name, pat in _AUTHORITY if pat.search(text)), None)
 
+    # An explicit caller number (Call Guard) wins over one parsed from the text.
+    caller = inp.phone or (_normalize_phone(phone.group(1)) if phone else None)
+
     return Report(
         raw_text=text,
         channel=inp.channel,
         claimed_authority=authority,
-        phone=_normalize_phone(phone.group(1)) if phone else None,
+        phone=caller,
         upi_id=upi.group(1).lower() if upi else None,
         account_no=account,
         reporter_id=inp.reporter_id,
         district=inp.district,
         language=inp.language,
+        caller_is_known=inp.caller_is_known,
         video_call=bool(re.search(r"video\s*call", text, re.I)) or None,
     )

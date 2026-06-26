@@ -111,6 +111,78 @@ SCRIPTS: list[ScamScript] = [
             "Demands a secret 'settlement'", "Pressure to stay on video call",
         ],
     ),
+    # ---- call-fraud families (Call Guard) -------------------------------
+    ScamScript(
+        id="otp_upi_collect",
+        family="OTP / UPI Fraud",
+        authority="bank",
+        template=(
+            "Sir, I am calling from your bank. To reverse the wrong debit I have sent a "
+            "request on your UPI app — just approve it and read me the 6-digit OTP to "
+            "confirm the refund of {amount}. Do it now or the amount is lost. Account {account}."
+        ),
+        red_flags=[
+            "Asks you to share an OTP", "Asks you to APPROVE a UPI collect request",
+            "Fake 'refund' / wrong-debit pretext", "Creates false urgency",
+        ],
+    ),
+    ScamScript(
+        id="ransom_family_emergency",
+        family="Kidnapping / Ransom",
+        authority="kidnapper",
+        template=(
+            "Listen carefully. We have your son. He had an accident and is with us. "
+            "If you call the police he is finished. Transfer {amount} to {upi} right now "
+            "and do not disconnect this call or tell anyone. We are watching you."
+        ),
+        red_flags=[
+            "Claims a relative is kidnapped / in an accident", "Forbids calling police",
+            "Demands immediate ransom transfer", "Extreme fear + secrecy pressure",
+            "Often uses an AI-cloned voice",
+        ],
+    ),
+    ScamScript(
+        id="sextortion",
+        family="Sextortion",
+        authority="blackmailer",
+        template=(
+            "I have recorded our video call and morphed your photos. I will send them to "
+            "your family and post them online unless you pay {amount} to {upi} in the next "
+            "hour. I have your contact list. Don't test me."
+        ),
+        red_flags=[
+            "Threatens to leak intimate / morphed images", "Blackmail after a video call",
+            "Threatens to contact your family", "Demands money to stay silent",
+        ],
+    ),
+    ScamScript(
+        id="loan_recovery",
+        family="Loan-app / Recovery",
+        authority="recovery agent",
+        template=(
+            "This is recovery for the loan app. Your EMI is overdue. Pay {amount} to {upi} "
+            "today or we send your morphed photo to everyone in your contacts and mark you "
+            "a defaulter at your office. Final warning."
+        ),
+        red_flags=[
+            "Predatory loan-app recovery threat", "Threatens to shame you to contacts",
+            "Demands immediate payment to a UPI handle",
+        ],
+    ),
+    ScamScript(
+        id="investment_task",
+        family="Investment / Task Scam",
+        authority="investment advisor",
+        template=(
+            "Congratulations! Complete simple tasks and earn daily. Your wallet shows a "
+            "profit of {amount} — to withdraw, first deposit a {amount} activation fee to "
+            "{upi}. Guaranteed 30% returns, our VIP group never loses."
+        ),
+        red_flags=[
+            "Promises guaranteed / unrealistic returns", "Pay-to-withdraw 'fee' trap",
+            "Task / part-time job earning bait", "Pressure from a VIP group",
+        ],
+    ),
 ]
 
 SCRIPTS_BY_ID = {s.id: s for s in SCRIPTS}

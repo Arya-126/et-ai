@@ -86,3 +86,26 @@ export async function fetchGeo() {
   if (!res.ok) throw new Error(`geo ${res.status}`);
   return res.json();
 }
+
+// --- call guard ---
+export async function screenCall(callerNumber, transcript, isSaved = false, language = "en") {
+  const res = await fetch(`/call/screen`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ caller_number: callerNumber, transcript, is_saved: isSaved, language }),
+  });
+  if (!res.ok) throw new Error(`screen ${res.status}`);
+  return res.json();
+}
+export async function fetchBlocklist() {
+  const res = await fetch(`/call/blocklist`);
+  if (!res.ok) throw new Error(`blocklist ${res.status}`);
+  return res.json();
+}
+
+// --- analytics ---
+export async function fetchAnalytics() {
+  const res = await fetch(`/analytics/summary`);
+  if (!res.ok) throw new Error(`analytics ${res.status}`);
+  return res.json();
+}

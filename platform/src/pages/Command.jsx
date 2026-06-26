@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { fetchGraph, fetchRings, fetchPackage, fetchAlerts, alertPdfUrl } from "../api.js";
+import { fetchGraph, fetchRings, fetchPackage, fetchAlerts, alertPdfUrl, fetchBlocklist } from "../api.js";
 import ForceGraph from "../components/graph/ForceGraph.jsx";
 import RingPanel from "../components/graph/RingPanel.jsx";
 import KingpinCard from "../components/graph/KingpinCard.jsx";
@@ -11,6 +11,7 @@ export default function Command() {
   const [selectedRing, setSelectedRing] = useState(null);
   const [pkg, setPkg] = useState(null);
   const [alerts, setAlerts] = useState([]);
+  const [blocklist, setBlocklist] = useState([]);
   const [err, setErr] = useState(null);
   const stageRef = useRef(null);
   const [dims, setDims] = useState({ width: 800, height: 600 });
@@ -27,6 +28,7 @@ export default function Command() {
     try {
       setGraph(await fetchGraph());
       setAlerts(await fetchAlerts());
+      setBlocklist(await fetchBlocklist());
       setErr(null);
     } catch (e) {
       setErr("Cannot reach backend on :8000 — is uvicorn running?");
@@ -104,6 +106,24 @@ export default function Command() {
                     </div>
                     <div className="text-xs text-slate-400 mt-0.5 truncate">{a.target}</div>
                   </a>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {blocklist.length > 0 && (
+            <div className="rounded-xl border border-amber-500/30 bg-slate-900 p-3">
+              <div className="text-xs uppercase tracking-wider text-amber-300/80 mb-2">
+                🚫 Known scammer numbers ({blocklist.length})
+              </div>
+              <div className="space-y-1 max-h-56 overflow-y-auto">
+                {blocklist.map((b) => (
+                  <div key={b.phone} className="flex justify-between text-xs bg-slate-800 rounded px-2 py-1.5">
+                    <span className="text-slate-200">{b.phone}</span>
+                    <span className="text-slate-400">
+                      {b.report_count} reports{b.in_ring ? " · ring" : ""}
+                    </span>
+                  </div>
                 ))}
               </div>
             </div>

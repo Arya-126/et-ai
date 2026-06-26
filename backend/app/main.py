@@ -18,7 +18,7 @@ from app.graph.factory import get_store
 from app.graph.networkx_store import NetworkXStore
 from app.llm import is_up as llm_is_up
 from app.llm import warmup as llm_warmup
-from app.routers import alerts, currency, geo, graph, package, report
+from app.routers import alerts, analytics, call, currency, geo, graph, package, report
 
 logging.basicConfig(level=logging.INFO)
 log = logging.getLogger("main")
@@ -73,6 +73,8 @@ app.include_router(package.router)
 app.include_router(alerts.router)
 app.include_router(geo.router)
 app.include_router(currency.router)
+app.include_router(call.router)
+app.include_router(analytics.router)
 
 
 @app.get("/health", tags=["meta"])
@@ -87,8 +89,8 @@ def health() -> dict:
         "llm_model": settings.ollama_model,
         "currency_cnn": cnn_ready,
         "spa_built": os.path.exists(os.path.join(_DIST, "index.html")),
-        "components": ["citizen_shield", "digital_arrest_alerting",
-                       "counterfeit_currency", "fraud_graph", "geospatial"],
+        "components": ["citizen_shield", "digital_arrest_alerting", "call_guard",
+                       "counterfeit_currency", "fraud_graph", "geospatial", "analytics"],
     }
 
 

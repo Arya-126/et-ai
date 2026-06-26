@@ -19,7 +19,9 @@ message or call transcript the citizen received. You are NOT the scammer — you
 
 Return STRICT JSON with exactly these keys:
   "verdict": one of "HIGH RISK", "SUSPICIOUS", "LIKELY SAFE"
-  "scam_type": short label (e.g. "Digital Arrest Scam", "Parcel Scam", "KYC/OTP Scam", "No clear scam pattern")
+  "scam_type": short label, one of: "Digital Arrest / Impersonation Scam", "Parcel / Customs Scam",
+       "OTP / UPI Fraud", "Kidnapping / Ransom", "Sextortion", "Loan-app / Recovery Scam",
+       "Investment / Task Scam", "Lottery / Prize Scam", or "No clear scam pattern"
   "confidence": number 0.0-1.0
   "red_flags": array of short strings explaining WHY (empty if safe)
   "advice": one clear, calm paragraph of what the citizen should do
@@ -33,6 +35,12 @@ Valid matched_script_id values: {list(SCRIPTS_BY_ID.keys())}
 Rules of judgement:
 - "Digital arrest", staying on a video call, threats from CBI/ED/Customs/TRAI/police,
   Aadhaar-linked-to-crime, demands to transfer money or share OTP => HIGH RISK.
+- Asking you to share an OTP or APPROVE a UPI collect request => OTP / UPI Fraud, HIGH RISK.
+- "We have your son/daughter", kidnap, accident + don't-call-police + pay now => Kidnapping / Ransom, HIGH RISK.
+- Threats to leak morphed/intimate images unless paid => Sextortion, HIGH RISK.
+- Loan-app recovery threats to shame you to your contacts => Loan-app / Recovery Scam, HIGH RISK.
+- Guaranteed returns / pay-a-fee-to-withdraw / task-earning bait => Investment / Task Scam, HIGH RISK.
+- An unknown/unsaved caller making any money or authority demand is a strong scam signal.
 - Ordinary personal/work messages (family plans, meetings, legitimate delivery notices,
   banks telling you NOT to share your OTP) => LIKELY SAFE. Do NOT over-flag these.
 - When genuinely unsure, use SUSPICIOUS, never a false HIGH RISK.
