@@ -72,9 +72,9 @@ export default function Command() {
 
   return (
     <div className="h-full flex text-slate-200">
-      <aside className="w-80 shrink-0 bg-slate-900 border-r border-slate-800 flex flex-col">
-        <div className="p-4 border-b border-slate-800">
-          <h1 className="text-lg font-bold text-white flex items-center gap-2">
+      <aside className="w-80 shrink-0 glass-strong border-r border-white/10 flex flex-col">
+        <div className="p-4 border-b border-white/10">
+          <h1 className="font-display text-lg font-bold text-white flex items-center gap-2">
             Command Dashboard
             {live && <span className="text-[10px] font-bold text-emerald-400 inline-flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />LIVE</span>}
           </h1>
@@ -89,14 +89,14 @@ export default function Command() {
         <div className="px-4 flex gap-2">
           <button
             onClick={detectRings}
-            className="flex-1 rounded-lg bg-cyan-500 hover:bg-cyan-400 text-slate-900 font-bold py-2"
+            className="btn-glow flex-1 rounded-lg font-bold py-2"
           >
             🔍 Detect Rings
           </button>
           <button
             onClick={loadGraph}
             title="Refresh graph (after new reports)"
-            className="rounded-lg bg-slate-700 hover:bg-slate-600 px-3 py-2"
+            className="rounded-lg glass hover:border-cyan-400/40 text-slate-200 px-3 py-2 transition"
           >
             ⟳
           </button>

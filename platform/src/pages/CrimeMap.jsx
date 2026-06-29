@@ -30,9 +30,9 @@ export default function CrimeMap() {
 
   return (
     <div className="h-full flex text-slate-200">
-      <aside className="w-72 shrink-0 bg-slate-900 border-r border-slate-800 flex flex-col">
-        <div className="p-4 border-b border-slate-800">
-          <h1 className="text-lg font-bold text-white">Crime Pattern Map</h1>
+      <aside className="w-72 shrink-0 glass-strong border-r border-white/10 flex flex-col">
+        <div className="p-4 border-b border-white/10">
+          <h1 className="font-display text-lg font-bold text-white">Crime Pattern Map</h1>
           <p className="text-xs text-slate-400">Geospatial command centre</p>
         </div>
         <div className="p-4 space-y-3 overflow-y-auto flex-1">

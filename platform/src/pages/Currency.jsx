@@ -40,16 +40,16 @@ export default function Currency() {
   const vs = result ? VERDICT_STYLE[result.verdict] : null;
 
   return (
-    <div className="h-full overflow-y-auto bg-slate-950 text-slate-200">
-      <div className="max-w-5xl mx-auto px-6 py-8">
-        <div className="text-cyan-400 text-xs font-bold tracking-widest uppercase">Counterfeit Currency Agent</div>
-        <h1 className="mt-1 text-3xl font-extrabold text-white">Scan a note for authenticity</h1>
-        <p className="mt-2 text-slate-400 text-sm max-w-2xl">
+    <div className="h-full overflow-y-auto text-slate-200">
+      <div className="max-w-5xl mx-auto px-6 py-10">
+        <div className="fade-up text-cyan-400 text-xs font-bold tracking-widest uppercase">Counterfeit Currency Agent</div>
+        <h1 className="fade-up font-display mt-2 text-3xl md:text-4xl font-extrabold text-white" style={{ animationDelay: "60ms" }}>Scan a note for authenticity</h1>
+        <p className="fade-up mt-2 text-slate-400 text-sm max-w-2xl" style={{ animationDelay: "100ms" }}>
           A CNN checks the note and OpenCV explains each security feature — microprint, security thread,
           UV patch, serial print. Same endpoint deploys on mobile cameras, POS terminals and bank counting machines.
         </p>
 
-        <div className="mt-6 grid md:grid-cols-2 gap-6">
+        <div className="mt-7 grid md:grid-cols-2 gap-6 fade-up" style={{ animationDelay: "140ms" }}>
           {/* left: pick / upload */}
           <div>
             <div className="text-sm font-semibold text-slate-300 mb-2">Demo samples (synthetic)</div>
@@ -74,7 +74,7 @@ export default function Currency() {
           </div>
 
           {/* right: result */}
-          <div className="rounded-xl border border-slate-800 bg-slate-900 p-4 min-h-[18rem]">
+          <div className="rounded-2xl glass p-5 min-h-[18rem]">
             {preview && <img src={preview} alt="scanned" className="w-full h-28 object-cover rounded mb-3 border border-slate-700" />}
             {busy && <div className="text-slate-400 text-sm">Analysing…</div>}
             {!busy && !result && <div className="text-slate-500 text-sm">Pick a sample or upload a note to scan.</div>}

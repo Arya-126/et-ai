@@ -43,6 +43,25 @@ serial). No real banknote imagery is used. "Genuine" notes carry all features;
 OpenCV feature checks (`cv/features.py`) are real; only the imagery is synthetic.
 On real note photos the same pipeline runs unchanged.
 
+## Advanced Defense Lab (research capabilities)
+
+The **algorithms** in `app/advanced/` are real; the **live data sources** they would
+consume in production are simulated and disclosed:
+
+- **Zero-knowledge officer verification** — a real non-interactive Schnorr proof over
+  the RFC 5114 1024-bit group. Demo officer keypairs are generated locally; a
+  production deployment issues keys via a real PKI / secure element.
+- **SIP / DPI forensics** — real SIP-header + packet-metadata anomaly scoring. The
+  sample SIP captures are synthetic; a production tap supplies live VoIP packets.
+- **Scam-baiting honeypot** — a real local-LLM agent + regex IoC extraction. The
+  "sinkhole" propagation to telecom/bank APIs is simulated (logged, not sent).
+- **rPPG liveness** — real green-channel FFT pulse detection. `demo()` runs it on a
+  disclosed synthetic rPPG signal; `analyze_video()` runs the same maths on a real
+  uploaded clip. Audio-visual desync detection is a documented extension point, not
+  implemented or faked.
+- **Federated learning** — a real FedAvg implementation over synthetic per-node
+  datasets; zero raw rows are shared, only model weights.
+
 ## Reproducibility
 
 The report generator is seeded (`random.seed(42)`) and the note generator

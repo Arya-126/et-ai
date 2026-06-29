@@ -52,19 +52,21 @@ export default function DemoController() {
     <>
       {!running && (
         <button onClick={run}
-          className="fixed bottom-5 right-5 z-50 rounded-full bg-cyan-500 hover:bg-cyan-400 text-slate-900 font-bold px-5 py-3 shadow-lg shadow-cyan-500/30">
-          ▶ Run demo
+          className="btn-glow pulse-ring fixed bottom-5 right-5 z-50 rounded-full font-bold px-6 py-3.5 inline-flex items-center gap-2">
+          <span className="text-base">▶</span> Run guided demo
         </button>
       )}
       {running && step && (
-        <div className="fixed bottom-0 left-0 right-0 z-50 bg-slate-900/95 border-t border-cyan-500/40 backdrop-blur px-6 py-4">
+        <div className="fixed bottom-0 left-0 right-0 z-50 glass-strong border-t border-cyan-500/40 px-6 py-4 slide-in-right">
           <div className="max-w-5xl mx-auto flex items-center gap-4">
-            <div className="text-cyan-400 font-bold text-sm shrink-0">DEMO {step.i + 1}/{STEPS.length}</div>
-            <div className="flex-1 text-slate-100 text-base">{step.cap}</div>
+            <div className="shrink-0 inline-flex items-center gap-2 rounded-full bg-cyan-400/15 border border-cyan-400/30 px-3 py-1 text-cyan-300 font-bold text-xs">
+              <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse" /> DEMO {step.i + 1}/{STEPS.length}
+            </div>
+            <div className="flex-1 text-slate-100 text-base font-medium">{step.cap}</div>
             <button onClick={stop} className="text-slate-400 hover:text-white text-sm shrink-0">✕ Stop</button>
           </div>
-          <div className="max-w-5xl mx-auto mt-2 h-1 bg-slate-800 rounded">
-            <div className="h-1 bg-cyan-400 rounded transition-all" style={{ width: `${((step.i + 1) / STEPS.length) * 100}%` }} />
+          <div className="max-w-5xl mx-auto mt-2.5 h-1.5 bg-slate-800/80 rounded-full overflow-hidden">
+            <div className="h-1.5 rounded-full transition-all duration-500" style={{ width: `${((step.i + 1) / STEPS.length) * 100}%`, background: "linear-gradient(90deg,#22d3ee,#818cf8)" }} />
           </div>
         </div>
       )}

@@ -110,6 +110,25 @@ export async function fetchAnalytics() {
   return res.json();
 }
 
+// --- advanced defense lab ---
+async function _post(path, body) {
+  const res = await fetch(path, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+  if (!res.ok) throw new Error(`${path} ${res.status}`);
+  return res.json();
+}
+async function _get(path) {
+  const res = await fetch(path);
+  if (!res.ok) throw new Error(`${path} ${res.status}`);
+  return res.json();
+}
+export const zkpVerify = (impersonator) => _post("/advanced/zkp/verify-officer", { impersonator });
+export const sipSamples = () => _get("/advanced/sip/samples");
+export const sipAnalyze = (sip_text, packet_meta) => _post("/advanced/sip", { sip_text, packet_meta });
+export const honeypotEngage = (history, message) => _post("/advanced/honeypot/engage", { history, message });
+export const honeypotSinkhole = (iocs) => _post("/advanced/honeypot/sinkhole", { iocs });
+export const livenessDemo = (live) => _get(`/advanced/liveness/demo?live=${live}`);
+export const federatedRun = () => _get("/advanced/federated");
+
 // --- impact / ROI ---
 export async function fetchImpact() {
   const res = await fetch(`/impact/summary`);

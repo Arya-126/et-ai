@@ -6,7 +6,7 @@ import tailwindcss from "@tailwindcss/vite";
 // frontend can use same-origin relative URLs in both dev and production.
 const API_PATHS = ["/report", "/graph", "/rings", "/package", "/health",
   "/alerts", "/geo", "/currency", "/call", "/analytics", "/languages",
-  "/impact", "/events"];
+  "/impact", "/events", "/advanced"];
 
 export default defineConfig({
   plugins: [react(), tailwindcss()],

@@ -73,8 +73,8 @@ export default function Shield() {
   const ivr = channel === "ivr";
 
   return (
-    <div className="h-full flex items-center justify-center bg-slate-200 p-4">
-      <div className="w-full max-w-md h-[88vh] flex flex-col rounded-xl overflow-hidden shadow-2xl bg-white">
+    <div className="h-full flex items-center justify-center p-4">
+      <div className="w-full max-w-md h-[88vh] flex flex-col rounded-2xl overflow-hidden shadow-2xl shadow-black/50 ring-1 ring-white/10 bg-white pop-in">
         {/* header */}
         <div className={`px-4 py-3 flex items-center gap-3 text-white ${ivr ? "bg-indigo-800" : "bg-[#075e54]"}`}>
           <div className="w-10 h-10 rounded-full bg-emerald-400 flex items-center justify-center text-xl">{ivr ? "☎️" : "🛡️"}</div>

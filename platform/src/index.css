@@ -1,11 +1,190 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Sora:wght@600;700;800&display=swap");
 @import "tailwindcss";
 
+/* ─────────────────────────────  Design tokens  ───────────────────────────── */
+:root {
+  --bg: #070b16;
+  --surface: 15 23 42;          /* slate-900 rgb, used with /opacity */
+  --brand: #22d3ee;            /* cyan-400 */
+  --brand-2: #6366f1;          /* indigo-500 */
+  --accent: #f472b6;           /* pink-400 */
+  --danger: #ef4444;
+  --ok: #34d399;
+
+  --ring: 0 0 0 1px rgba(148, 163, 184, 0.10);
+  --shadow-glow: 0 0 0 1px rgba(34, 211, 238, 0.18), 0 18px 50px -18px rgba(34, 211, 238, 0.35);
+
+  color-scheme: dark;
+}
+
 html, body, #root { height: 100%; margin: 0; }
-body { background: #0b1220; }
+
+body {
+  background: var(--bg);
+  color: #e2e8f0;
+  font-family: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* Ambient aurora — fixed, behind everything, subtle drift */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(48rem 38rem at 12% -8%, rgba(34, 211, 238, 0.16), transparent 60%),
+    radial-gradient(42rem 34rem at 92% 4%, rgba(99, 102, 241, 0.16), transparent 60%),
+    radial-gradient(40rem 40rem at 70% 108%, rgba(244, 114, 182, 0.10), transparent 60%);
+  animation: aurora 22s ease-in-out infinite alternate;
+}
+/* faint grid texture over the aurora */
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-image:
+    linear-gradient(rgba(148, 163, 184, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(148, 163, 184, 0.04) 1px, transparent 1px);
+  background-size: 44px 44px;
+  mask-image: radial-gradient(ellipse at 50% 0%, #000 35%, transparent 80%);
+}
+
+@keyframes aurora {
+  0%   { transform: translate3d(0, 0, 0) scale(1); }
+  50%  { transform: translate3d(2%, 1.5%, 0) scale(1.06); }
+  100% { transform: translate3d(-2%, -1%, 0) scale(1.02); }
+}
+
+/* Display font for big headings */
+.font-display {
+  font-family: "Sora", "Inter", ui-sans-serif, system-ui, sans-serif;
+  letter-spacing: -0.02em;
+}
+
+/* ─────────────────────────────  Reusable surfaces  ───────────────────────── */
+.glass {
+  background: linear-gradient(180deg, rgba(30, 41, 59, 0.55), rgba(15, 23, 42, 0.65));
+  backdrop-filter: blur(14px);
+  border: 1px solid rgba(148, 163, 184, 0.12);
+}
+.glass-strong {
+  background: linear-gradient(180deg, rgba(30, 41, 59, 0.78), rgba(15, 23, 42, 0.85));
+  backdrop-filter: blur(18px);
+  border: 1px solid rgba(148, 163, 184, 0.14);
+}
+
+/* Card with a quiet lift + glow on hover */
+.card-hover {
+  transition: transform .25s cubic-bezier(.22,.61,.36,1), box-shadow .25s ease, border-color .25s ease;
+  will-change: transform;
+}
+.card-hover:hover {
+  transform: translateY(-4px);
+  border-color: rgba(34, 211, 238, 0.45);
+  box-shadow: var(--shadow-glow);
+}
+
+/* Gradient text */
+.gradient-text {
+  background: linear-gradient(100deg, #67e8f9 0%, #818cf8 55%, #f0abfc 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* Top accent bar for stat cards */
+.accent-top { position: relative; overflow: hidden; }
+.accent-top::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 3px;
+  background: linear-gradient(90deg, transparent, var(--brand), var(--brand-2), transparent);
+  opacity: .75;
+}
+
+/* Primary glow button */
+.btn-glow {
+  background: linear-gradient(180deg, #22d3ee, #06b6d4);
+  color: #042f3a;
+  box-shadow: 0 10px 30px -10px rgba(34, 211, 238, 0.7);
+  transition: transform .15s ease, box-shadow .25s ease, filter .2s ease;
+}
+.btn-glow:hover { filter: brightness(1.06); transform: translateY(-1px); box-shadow: 0 16px 40px -12px rgba(34,211,238,.85); }
+.btn-glow:active { transform: translateY(0); }
+
+/* ─────────────────────────────  Animations  ─────────────────────────────── */
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.fade-up { animation: fade-up .6s cubic-bezier(.22,.61,.36,1) both; }
+
+@keyframes pop-in {
+  0%   { opacity: 0; transform: scale(.92); }
+  60%  { opacity: 1; transform: scale(1.02); }
+  100% { transform: scale(1); }
+}
+.pop-in { animation: pop-in .4s cubic-bezier(.22,.61,.36,1) both; }
+
+@keyframes pulse-ring {
+  0%   { box-shadow: 0 0 0 0 rgba(34, 211, 238, 0.45); }
+  70%  { box-shadow: 0 0 0 12px rgba(34, 211, 238, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(34, 211, 238, 0); }
+}
+.pulse-ring { animation: pulse-ring 2s ease-out infinite; }
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+@keyframes grow-x {
+  from { transform: scaleX(0); }
+  to   { transform: scaleX(1); }
+}
+
+@keyframes slide-in-right {
+  from { opacity: 0; transform: translateX(24px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+.slide-in-right { animation: slide-in-right .35s cubic-bezier(.22,.61,.36,1) both; }
+
+@keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
+
+/* Stagger helper: opacity-only so it never holds a transform that would
+   override the hover lift on .card-hover children. Set --i on each child. */
+.stagger > * { animation: fade-in .55s ease both; animation-delay: calc(var(--i, 0) * 70ms); }
 
 /* WhatsApp-ish chat backdrop (citizen view) */
 .chat-bg {
   background-color: #efeae2;
   background-image: radial-gradient(rgba(0, 0, 0, 0.04) 1px, transparent 1px);
   background-size: 16px 16px;
+}
+
+/* ─────────────────────────────  Scrollbars  ─────────────────────────────── */
+* { scrollbar-width: thin; scrollbar-color: rgba(148,163,184,.28) transparent; }
+*::-webkit-scrollbar { width: 9px; height: 9px; }
+*::-webkit-scrollbar-thumb {
+  background: rgba(148,163,184,.25);
+  border-radius: 999px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+*::-webkit-scrollbar-thumb:hover { background: rgba(148,163,184,.45); background-clip: content-box; }
+
+/* Hidden scrollbar (header nav overflow) */
+.no-scrollbar { scrollbar-width: none; }
+.no-scrollbar::-webkit-scrollbar { display: none; }
+
+/* Respect reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .001ms !important; animation-iteration-count: 1 !important; }
+  body::before { animation: none; }
 }
